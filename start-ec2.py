@@ -1,7 +1,7 @@
 import boto3
 
-region = ''     ### Don't forget to update region
-instances = ['']  ### Dont forget to update instanceID
+region = 'ap-southeast-1'     ### Don't forget to update region
+instances = ['i-0121960b31d53e444']  ### Dont forget to update instanceID
 ec2 = boto3.client('ec2', region_name=region)
 
 def lambda_handler(event, context):
