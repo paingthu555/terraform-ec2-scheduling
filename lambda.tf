@@ -1,19 +1,19 @@
 
-data "archive_file" "source_ec2_stop" {
+data "archive_file" "ec2_stop_script" {
   type        = "zip"
-  source_file = "/home/ptnc/terraform-ec2-scheduling/stop-ec2.py"
-  output_path = "ec2_stop.zip"
+  source_file = "${path.module}/stop-ec2.py"
+  output_path = "stop-ec2.zip"
 }
 
 resource "aws_lambda_function" "ec2_stop" {
 
-  filename      = "ec2_stop.zip"
-  function_name = "ec2_stop_auto"
-  role          = aws_iam_role.lambda_schedule_role.arn
-  handler       = "ec2_stop.lambda_handler"
+  filename      = "stop-ec2.zip"
+  function_name = "ec2_stop_function"
+  role          = aws_iam_role.lambda_exec_role.arn
+  handler       = "stop-ec2.lambda_handler"
   timeout       = 60
 
-  source_code_hash = data.archive_file.source_ec2_stop.output_base64sha256
+  source_code_hash = data.archive_file.ec2_stop_script.output_base64sha256
 
   runtime = "python3.9"
 
@@ -26,21 +26,21 @@ resource "aws_lambda_function" "ec2_stop" {
 }
 
 
-data "archive_file" "souece_ec2_start" {
+data "archive_file" "ec2_start_script" {
   type        = "zip"
-  source_file = "/home/ptnc/terraform-ec2-scheduling/start-ec2.py"
-  output_path = "ec2_start.zip"
+  source_file = "${path.module}/start-ec2.py"
+  output_path = "start-ec2.zip"
 }
 
 resource "aws_lambda_function" "ec2_start" {
 
-  filename      = "ec2_start.zip"
-  function_name = "ec2_start_auto"
-  role          = aws_iam_role.lambda_schedule_role.arn
-  handler       = "ec2_start.lambda_handler"
+  filename      = "start-ec2.zip"
+  function_name = "ec2_start_function"
+  role          = aws_iam_role.lambda_exec_role.arn
+  handler       = "start-ec2.lambda_handler"
   timeout       = 60
 
-  source_code_hash = data.archive_file.souece_ec2_start.output_base64sha256
+  source_code_hash = data.archive_file.ec2_start_script.output_base64sha256
 
   runtime = "python3.9"
 
