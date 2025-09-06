@@ -1,6 +1,8 @@
 # Automated start and stop schedule for EC2 using Terraform and Lambda
 
-This project based on the realworld use case. Therefore, you must have at least one existing ec2 instance before you test this project.
+This project based on the real-world use case. Therefore, you must have at least one existing ec2 instance before you test this project. 
+
+Another things is that I've set schedule in eventbridge to start every 2mins and stop it every 5mins for easy testing. You can verify the event in the AWS cloud trail and you can specified the schedule according to your business requirement. Let's get started! 
 
 ## Project diagram
 ![diagram](./images/terraform-ec2-scheduling.png)
