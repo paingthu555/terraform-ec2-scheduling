@@ -8,7 +8,7 @@ resource "aws_scheduler_schedule" "EC2_start_schedule" {
 
   target {
     arn      = aws_lambda_function.ec2_start.arn
-    role_arn = aws_iam_role.lambda_schedule_role.arn
+    role_arn = aws_iam_role.eventbridge_schedule_role.arn
   }
 }
 
@@ -21,6 +21,6 @@ resource "aws_scheduler_schedule" "EC2_stop_schedule" {
 
   target {
     arn      = aws_lambda_function.ec2_stop.arn
-    role_arn = aws_iam_role.lambda_schedule_role.arn
+    role_arn = aws_iam_role.eventbridge_schedule_role.arn
   }
 }

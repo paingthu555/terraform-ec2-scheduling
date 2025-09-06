@@ -1,83 +1,45 @@
-resource "aws_iam_policy" "policy" {
+# Allows Lambda to log to CloudWatch and start/stop EC2
+resource "aws_iam_policy" "ec2_schedule_policy" {
   name        = "ec2_schedule_policy"
-  path        = "/"
-  description = "ec2_schedule_policy"
   policy = file("${path.module}/ec2_schedule_policy.json")
 
-#   policy = jsonencode(
-#     {
-#     "Version": "2012-10-17",
-#     "Statement": [
-#         {
-#             "Effect": "Allow",
-#             "Action": [
-#                 "logs:CreateLogGroup",
-#                 "logs:CreateLogStream",
-#                 "logs:PutLogEvents"
-#             ],
-#             "Resource": "arn:aws:logs:*:*:*"
-#         },
-#         {
-#             "Effect": "Allow",
-#             "Action": [
-#                 "ec2:Start*",
-#                 "ec2:Stop*"
-#             ],
-#             "Resource": "*"
-#         }
-#     ]
-# }
-#   )
 }
 
-resource "aws_iam_role" "lambda_schedule_role" {
-  name = "lambda_schedule_role"
-
-  assume_role_policy = file("${path.module}/lambda_schedule_role.json")
+# Allow EventBridge Scheduler can invoke the Lambda functions
+resource "aws_iam_policy" "scheduler_invoke_lambda" {
+  name        = "scheduler_invoke_lambda"
+  policy = templatefile("${path.module}/scheduler_invoke_lambda_policy.json", {
+    ec2_start_arn = aws_lambda_function.ec2_start.arn,
+    ec2_stop_arn  = aws_lambda_function.ec2_stop.arn
+  })
 }
 
+# Trust policy for EventBridge Scheduler.
+resource "aws_iam_role" "eventbridge_schedule_role" {
+  name = "eventbridge_schedule_role"
+  assume_role_policy = file("${path.module}/eventbridge_schedule_role.json")
+}
+
+# Trust policy for Lambda execution.
 resource "aws_iam_role" "lambda_exec_role" {
   name = "lambda_exec_role"
   assume_role_policy = file("${path.module}/lambda_exec_role.json")
 }
 
-
-resource "aws_iam_policy_attachment" "ec2_auto_attach" {
-  name       = "ec2_stop_start_policy_attachment"
-  roles      = [aws_iam_role.lambda_schedule_role.name]
-  policy_arn = aws_iam_policy.policy.arn
+# Attach ec2_schedule_policy to eventbridge_schedule_role
+resource "aws_iam_role_policy_attachment" "ec2_stop_start_policy_attach" {
+  role       = aws_iam_role.eventbridge_schedule_role.name
+  policy_arn = aws_iam_policy.ec2_schedule_policy.arn
 }
 
-# Attach the policy to the IAM role
-resource "aws_iam_role_policy_attachment" "lambda_exec_policy_attachment" {
-  policy_arn = aws_iam_policy.policy.arn
+# Attach with ec2_schedule_policy to lambda_exec_role
+resource "aws_iam_role_policy_attachment" "lambda_exec_policy_attach" {
   role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = aws_iam_policy.ec2_schedule_policy.arn
 }
 
-# resource "aws_iam_role_policy_attachment" "lambda_schedule_policy_attachment" {
-#   policy_arn = aws_iam_policy.policy.arn
-#   role       = aws_iam_role.lambda_schedule_role.name
-# }
-
-resource "aws_iam_policy" "scheduler_invoke_lambda" {
-  name        = "scheduler_invoke_lambda"
-  description = "Allow EventBridge Scheduler to invoke Lambda functions"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = "lambda:InvokeFunction",
-        Resource = [
-          aws_lambda_function.ec2_start.arn,
-          aws_lambda_function.ec2_stop.arn
-        ]
-      }
-    ]
-  })
-}
-
+# Attach with scheduler_invoke_lambda to lambda_schedule_role
 resource "aws_iam_role_policy_attachment" "scheduler_invoke_lambda_attach" {
-  role       = aws_iam_role.lambda_schedule_role.name
+  role       = aws_iam_role.eventbridge_schedule_role.name
   policy_arn = aws_iam_policy.scheduler_invoke_lambda.arn
 }

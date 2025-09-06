@@ -1,0 +1,13 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": [
+        "${ec2_start_arn}",
+        "${ec2_stop_arn}"
+      ]
+    }
+  ]
+}

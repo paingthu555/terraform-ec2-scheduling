@@ -1,4 +1,3 @@
-
 data "archive_file" "ec2_stop_script" {
   type        = "zip"
   source_file = "${path.module}/stop-ec2.py"
