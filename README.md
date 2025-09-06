@@ -50,4 +50,4 @@ Note: After running the terraform plan and apply command, you must enter your ec
 
 ![event](./images/event_history.png)
 
-![role](.images/role.png)
+![role](./images/role.png)
